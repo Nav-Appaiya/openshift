@@ -1,44 +1,32 @@
-# -*- coding: utf-8 -*- 
+#!/usr/bin/env python
+
 import requests
-import re
-import urlparse
+from BeautifulSoup import BeautifulSoup
 
-# In this example we're trying to collect e-mail addresses from a website
+url = "http://www.python.org"
+response = requests.get(url)
+# parse html
+page = str(BeautifulSoup(response.content))
 
-# Basic e-mail regexp:
-# letter/number/dot/comma @ letter/number/dot/comma . letter/number
-email_re = re.compile(r'([\w\.,]+@[\w\.,]+\.\w+)')
 
-# HTML <a> regexp
-# Matches href="" attribute
-link_re = re.compile(r'href="(.*?)"')
+def getURL(page):
+    """
 
-def crawl(url, maxlevel):
-    # Limit the recursion, we're not downloading the whole Internet
-    if(maxlevel == 0):
-        return
+    :param page: html of web page (here: Python home page) 
+    :return: urls in that page 
+    """
+    start_link = page.find("a href")
+    if start_link == -1:
+        return None, 0
+    start_quote = page.find('"', start_link)
+    end_quote = page.find('"', start_quote + 1)
+    url = page[start_quote + 1: end_quote]
+    return url, end_quote
 
-    # Get the webpage
-    req = requests.get(url)
-    result = []
-
-    # Check if successful
-    if(req.status_code != 200):
-        return []
-
-    # Find and follow all the links
-    links = link_re.findall(req.text)
-    for link in links:
-        # Get an absolute URL for a link
-        link = urlparse.urljoin(url, link)
-        result += crawl(link, maxlevel - 1)
-
-    # Find all emails on current page
-    result += email_re.findall(req.text)
-    return result
-
-emails = crawl('http://localhost:8000', 2)
-
-print "Scrapped e-mail addresses:"
-for e in emails:
-    print e
+while True:
+    url, n = getURL(page)
+    page = page[n:]
+    if url:
+        print url
+    else:
+        break
