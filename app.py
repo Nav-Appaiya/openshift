@@ -1,12 +1,11 @@
 #!/usr/bin/env python
-
-import requests
+import os, csv, json, requests
 from bs4 import BeautifulSoup
 
-url = "http://www.python.org"
+url = "https://www.ede.nl/gemeentearchief/collecties/opendata/datasets-gemeentearchief-ede/wederopbouw-gemeente-ede-1940-1945/"
 response = requests.get(url)
 # parse html
-page = str(BeautifulSoup(response.content))
+page = BeautifulSoup(response.content, "lxml")
 
 
 def getURL(page):
@@ -15,17 +14,13 @@ def getURL(page):
     :param page: html of web page (here: Python home page) 
     :return: urls in that page 
     """
-    start_link = page.find("a href")
-    if start_link == -1:
-        return None, 0
-    start_quote = page.find('"', start_link)
-    end_quote = page.find('"', start_quote + 1)
-    url = page[start_quote + 1: end_quote]
-    return url, end_quote
+    allHrefLinks = page.findAll("a href")
+    
+    return allHrefLinks
 
 while True:
-    url, n = getURL(page)
-    page = page[n:]
+    url = getURL(page)
+    
     if url:
         print(url)
     else:
