@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import requests
-from BeautifulSoup import BeautifulSoup
+from bs4 import BeautifulSoup
 
 url = "http://www.python.org"
 response = requests.get(url)
@@ -27,6 +27,6 @@ while True:
     url, n = getURL(page)
     page = page[n:]
     if url:
-        print url
+        print(url)
     else:
         break
